@@ -69,7 +69,7 @@ class BiGraphDataset(Dataset):
                 donecounter+=1
                 if donecounter%100==0 and donecounter!=0:
                     print(str(donecounter)+"/"+str(len(fold_x))+" done.")
-                    break # 100 is enough for the test... 
+                    # break # 100 is enough for the test... 
                     # noteworthy is that their splits are for whole dataset splits, not like dataset into 5 splits then train test each.
                 threaddict = {}
                 pointerdict = {}
