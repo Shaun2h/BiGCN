@@ -95,7 +95,12 @@ class Net(th.nn.Module):
 
 
 def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,patience,n_epochs,batchsize,dataname,iter):
-    model = Net(5000,64,64).to(device)
+    # Oh No! Naughty Injection via is_PHEME.
+    is_PHEME= datasetname=="PHEME"
+    if not is_PHEME:
+        model = Net(5000,64,64).to(device)
+    else:
+        model = Net(256*768,64,64).to(device) # i'm assuming we're bert embedding this?? # yes shaun says lol.
     BU_params=list(map(id,model.BUrumorGCN.conv1.parameters()))
     BU_params += list(map(id, model.BUrumorGCN.conv2.parameters()))
     base_params=filter(lambda p:id(p) not in BU_params,model.parameters())
@@ -110,10 +115,12 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
     train_accs = []
     val_accs = []
     early_stopping = EarlyStopping(patience=patience, verbose=True)
+    traindata_list, testdata_list = loadBiData(dataname, treeDic, x_train, x_test, TDdroprate,BUdroprate)
+    train_loader = DataLoader(traindata_list, batch_size=batchsize, shuffle=True, num_workers=0)
+    test_loader = DataLoader(testdata_list, batch_size=batchsize, shuffle=True, num_workers=0)
+     # jesus christ i'm not reinitiating this EVERY epoch. i'm moving this out to initiate only once. it shouldn't have any effects.
     for epoch in range(n_epochs):
-        traindata_list, testdata_list = loadBiData(dataname, treeDic, x_train, x_test, TDdroprate,BUdroprate)
-        train_loader = DataLoader(traindata_list, batch_size=batchsize, shuffle=True, num_workers=5)
-        test_loader = DataLoader(testdata_list, batch_size=batchsize, shuffle=True, num_workers=5)
+
         avg_loss = []
         avg_acc = []
         batch_idx = 0
@@ -202,10 +209,12 @@ lr=0.0005
 weight_decay=1e-4
 patience=10
 n_epochs=200
-batchsize=128
+batchsize=128 #theirs is 128.. for pheme with a bert embedding though.. it's not really possible without a massive space.
 TDdroprate=0.2
 BUdroprate=0.2
 datasetname=sys.argv[1] #"Twitter15"、"Twitter16"
+if datasetname=="PHEME":
+    batchsize=24 # If pheme, adjust to this.
 iterations=int(sys.argv[2])
 model="GCN"
 device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
@@ -220,7 +229,10 @@ for iter in range(iterations):
     fold2_x_test, fold2_x_train, \
     fold3_x_test, fold3_x_train, \
     fold4_x_test,fold4_x_train = load5foldData(datasetname)
-    treeDic=loadTree(datasetname)
+    if datasetname!="PHEME":
+        treeDic=loadTree(datasetname)
+    else:
+        treeDic = {} # Won't be using this...
     train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
                                                                                                fold0_x_test,
                                                                                                fold0_x_train,

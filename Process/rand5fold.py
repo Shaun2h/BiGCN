@@ -99,9 +99,13 @@ def load5foldData(obj):
         fold4_x_test.extend(T[leng3*4:leng3*5])
         fold4_x_test.extend(U[leng4*4:leng4*5])
 
-    if obj == "Weibo":
-        labelPath = os.path.join(cwd,"data/Weibo/weibo_id_label.txt")
-        print("loading weibo label:")
+    if obj == "Weibo" or obj=="PHEME":
+        if not "PHEME":
+            labelPath = os.path.join(cwd,"data/Weibo/weibo_id_label.txt")
+            print("loading weibo label:")
+        else:
+            labelPath = os.path.join(cwd,"PHEME_labelsplits.txt")
+            print("loading PHEME label (like fake tho):")
         F, T = [], []
         l1 = l2 = 0
         labelDic = {}
@@ -153,6 +157,9 @@ def load5foldData(obj):
         fold4_x_test.extend(F[leng1 * 4:leng1 * 5])
         fold4_x_test.extend(T[leng2 * 4:leng2 * 5])
 
+
+    
+
     fold0_test = list(fold0_x_test)
     shuffle(fold0_test)
     fold0_train = list(fold0_x_train)
@@ -179,3 +186,6 @@ def load5foldData(obj):
            list(fold2_test),list(fold2_train),\
            list(fold3_test),list(fold3_train),\
            list(fold4_test), list(fold4_train)
+
+
+    

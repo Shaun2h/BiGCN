@@ -1,0 +1,60 @@
+You probably want to venv this because it toggles with versions of scikitlearn and other things.
+guys, cuda ISNT always back compatible. Stop fucking lying.
+
+
+To install torch (assuming you go with 1.7 instead of their 1.4 due to GPU compatibility), use:
+pip install torch==1.7.0+cu110 torchvision==0.8.1+cu110 torchaudio==0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+Do NOT use torchvision==0.8.0+cu110 the file does NOT exist as a "stable" version in their link.
+
+https://data.pyg.org/whl/ 
+    - Select your appropriate pytorch version link here, which then directs you to available BUILT wheels for cluster, sparse, scatter.
+    Ignore spline.
+    
+    python -m pip install <wheel name>
+    
+    
+torch_geometric can be installed via 
+    python -m pip install torch-geometric==2.0.0 
+    
+    DO NOT USE 1.3.2 as they CLAIMED. IT WONT RUN IF YOU DO THAT
+
+This is the approximation.
+
+Run:
+python -m pip install transformers==4.17.0 
+
+
+
+unzip their datafile, create other folders they need.
+
+run:
+
+unzip -d ./data/Weibo ./data/Weibo/weibotree.txt.zip
+
+mkdir .\data/Twitter15graph
+mkdir .\data/Twitter16graph
+mkdir .\data/weibograph
+
+
+In the home directory  (AND IT MUST BE THE HOME DIRECTORY)
+python ./Process/getWeibograph.py
+python ./Process/getTwittergraph.py Twitter15
+python ./Process/getTwittergraph.py Twitter16
+python ./model/Twitter/BiGC N_Twitter.py Twitter15 100
+
+
+In ./model/Twitter/BiGC N_Twitter.py and ./model/Weibo/BiGCN_Weibo.py
+
+Set num_workers to 0 for compatibility issues. This is due to their classes being UNPICKLEABLE.
+
+You also want to run Pheme_Tree_extraction.py, which can actually extract the entire pheme trees and stuff from
+all-rnr-annotated
+which is the pheme dataset. just leave all-rnr-annotated in the current folder with this. (without taking out the events)
+
+More customisation can be done to TRACE back the original words that were used...
+
+
+
+
+python .\model\Twitter\BiGCN_Twitter.py PHEME 100

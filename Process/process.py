@@ -55,10 +55,10 @@ def loadUdData(dataname, treeDic,fold_x_train,fold_x_test,droprate):
 def loadBiData(dataname, treeDic, fold_x_train, fold_x_test, TDdroprate,BUdroprate):
     data_path = os.path.join(cwd,'data', dataname + 'graph')
     print("loading train set", )
-    traindata_list = BiGraphDataset(fold_x_train, treeDic, tddroprate=TDdroprate, budroprate=BUdroprate, data_path=data_path)
+    traindata_list = BiGraphDataset(fold_x_train, treeDic, tddroprate=TDdroprate, budroprate=BUdroprate, data_path=data_path,ispheme=dataname=="PHEME")
     print("train no:", len(traindata_list))
     print("loading test set", )
-    testdata_list = BiGraphDataset(fold_x_test, treeDic, data_path=data_path)
+    testdata_list = BiGraphDataset(fold_x_test, treeDic, data_path=data_path,ispheme=dataname=="PHEME")
     print("test no:", len(testdata_list))
     return traindata_list, testdata_list
 
