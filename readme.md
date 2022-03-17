@@ -1,6 +1,27 @@
 # Paper of the source codes released:  
 Tian Bian, Xi Xiao, Tingyang Xu, Peilin Zhao, Wenbing Huang, Yu Rong, Junzhou Huang. Rumor Detectionon Social Media with Bi-Directional Graph Convolutional Networks. AAAI 2020.
 
+
+# HOW TO INSTALL
+Disregard what they write below, Use the How to actually install.txt file for instructions.
+
+
+Make sure you venv.
+
+
+Tested for Windows.
+
+
+The requirements.txt has @SOMEFILE for some of the versions. Look in install.txt
+
+But if you were wondering...
+
+1: torch_scatter-2.0.5-cp37-cp37m-win_amd64.whl
+2: torch_sparse-0.6.8-cp37-cp37m-win_amd64.whl
+3: torch_cluster-1.5.8-cp37-cp37m-win_amd64.whl
+
+
+
 # Datasets:  
 The datasets used in the experiments were based on the three publicly available Weibo and Twitter datasets released by Ma et al. (2016) and Ma et al. (2017):
 
