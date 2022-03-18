@@ -78,6 +78,9 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                 
                 if rootlabel[0]==0:
                     # note how i invert this, because his WEIBO reader is inverted labels from mine.
+                    # however, it doesn't have any TRUE final impact on the labels themselves as the original
+                    # code only uses this to split them equally. The actual label order is preserved in the other part without inversion
+                    # <just fyi. anyway if you're reading this bit just don't sweat it it's correct. sadly.>
                     labelfile.write(str(source_id)+" 1\n")
                 else:
                     labelfile.write(str(source_id)+" 0\n") 

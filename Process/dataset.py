@@ -61,11 +61,13 @@ class BiGraphDataset(Dataset):
             # these boys will be garbage collected after this anyway..
             self.data_PHEME = []
             donecounter = 0
+            self.original_thread_saver = []
             for thread in allthreads:
                 threadtextlist,tree,rootlabel,source_id = thread
                 if not source_id in fold_x:
                     continue # it's not in this fold...
                 # ["tweettext","tweetid","authid"]
+                self.original_thread_saver.append(thread)
                 donecounter+=1
                 if donecounter%100==0 and donecounter!=0:
                     print(str(donecounter)+"/"+str(len(fold_x))+" done.")
@@ -124,9 +126,37 @@ class BiGraphDataset(Dataset):
 
     def __len__(self):
         if not self.is_pheme_pointer:
+            threadtextlist,tree,rootlabel,source_id = self.original_thread_saver[idx]
             return len(self.fold_x)
         else:
             return len(self.data_PHEME)
+
+    def roundback(self,index):
+        """
+        backtrack and find out more information on the original data/tree etc that constituted this particular index.
+        
+        Return format:
+        threadtextlist,tree,rootlabel,source_id
+        threadtextlist -> [ ["tweettext","tweetid","authid"], ["tweettext","tweetid","authid"] ....  ]
+        tree -> {id1:[<CHILDREN>], id2:[<CHILDREN>] ...  }   # note that it should be strings for the id iirc
+        rootlabel -> 0 or 1,   -->    0 = nonrumour, 1 = rumour
+        source_id -> the original nodes' id
+        """
+        if self.is_pheme_pointer:
+            threadtextlist,tree,rootlabel,source_id = self.data_PHEME[idx]
+            
+            return threadtextlist,tree,rootlabel,source_id
+        else:
+            print("\n\n")
+            print("A request was made but.. this method only works for my self written pheme stuff...")
+            print("No proper explainability can be performed on the Twitter15/Twitter16 processed datasets.")
+            print("An accounting issue is also present, please see https://github.com/Shaun2h/Rumor_RvNN")
+            print("Specifically, Resource Fabrication Folder, which attempts to replicate her processing")
+            print("And More importantly, Run accountability.py in that folder to see issues in the tweet ids provided in the actual set")
+            print("Versus total tree number and tweet number inflation (that cannot be explained) in the processed data.")
+            print("\n\n")
+        return
+        
 
     def __getitem__(self, index):
         if not self.is_pheme_pointer:

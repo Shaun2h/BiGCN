@@ -126,6 +126,8 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         batch_idx = 0
         tqdm_train_loader = tqdm(train_loader)
         for Batch_data in tqdm_train_loader:
+            if len(Batch_data)<1:
+                continue
             Batch_data.to(device)
             out_labels= model(Batch_data)
             finalloss=F.nll_loss(out_labels,Batch_data.y)
