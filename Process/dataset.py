@@ -71,7 +71,10 @@ class BiGraphDataset(Dataset):
                 donecounter+=1
                 if donecounter%100==0 and donecounter!=0:
                     print(str(donecounter)+"/"+str(len(fold_x))+" done.")
-                    # break # 100 is enough for the test... 
+                    break
+                    # if donecounter>400:
+                        # break
+                    #break # 100 is enough for the test... 
                     # noteworthy is that their splits are for whole dataset splits, not like dataset into 5 splits then train test each.
                 threaddict = {}
                 pointerdict = {}
@@ -90,7 +93,6 @@ class BiGraphDataset(Dataset):
                         torow.append(pointerdict[target])
                 # edge matrix is created... for those that lack edges.. i'll raise this later in discussion.
                 invertedpointer = dict(map(reversed, pointerdict.items()))
-                
 
                 allinputs_list = []  # allinputs_list acts as data["x"]
                 for numbered in sorted(invertedpointer):
@@ -103,8 +105,6 @@ class BiGraphDataset(Dataset):
                 with torch.no_grad():
                     data['root'] = tempymodel(**tempytokenizer(threaddict[source_id], padding="max_length", max_length=256, truncation=True, return_tensors="pt").to(device)).last_hidden_state.cpu()
                 data["rootindex"] = pointerdict[source_id]
-                
-
                 data["x"] = allinputs_list # you also need to convert this to a tensor.
                 #torch.LongTensor()
                 
@@ -126,7 +126,6 @@ class BiGraphDataset(Dataset):
 
     def __len__(self):
         if not self.is_pheme_pointer:
-            threadtextlist,tree,rootlabel,source_id = self.original_thread_saver[idx]
             return len(self.fold_x)
         else:
             return len(self.data_PHEME)
@@ -143,7 +142,7 @@ class BiGraphDataset(Dataset):
         source_id -> the original nodes' id
         """
         if self.is_pheme_pointer:
-            threadtextlist,tree,rootlabel,source_id = self.data_PHEME[idx]
+            threadtextlist,tree,rootlabel,source_id = self.data_PHEME[index]
             
             return threadtextlist,tree,rootlabel,source_id
         else:
@@ -162,11 +161,10 @@ class BiGraphDataset(Dataset):
         if not self.is_pheme_pointer:
             id =self.fold_x[index]
             data=np.load(os.path.join(self.data_path, id + ".npz"), allow_pickle=True)
-            print(data.files)
+            # print(data.files)
         else:
             # PHEME LOADER HERE
             data = self.data_PHEME[index]
-            
         # EXPERIMENTS TO SEE THE DATA FORMAT SO WE CAN MIMIC.
         
         
@@ -226,6 +224,7 @@ class BiGraphDataset(Dataset):
             # print(torch.LongTensor(new_edgeindex).shape)
             # print(torch.LongTensor(data["root"]).shape)
             # print(torch.tensor(data['x'],dtype=torch.float32).shape)
+            
             return Data(x=torch.tensor(data['x'],dtype=torch.float32),
                     edge_index=torch.LongTensor(new_edgeindex),BU_edge_index=torch.LongTensor(bunew_edgeindex),
                     y=torch.LongTensor([int(data['y'])]), root=torch.LongTensor(data['root']),
@@ -235,6 +234,10 @@ class BiGraphDataset(Dataset):
             # print(torch.LongTensor(new_edgeindex).shape)
             # print(data["root"].shape)
             # print(data["x"].shape) #you need to flatten and CHANGE the model shape in order to fit...
+            # print("overall number of tweets shape:",data["x"].shape)
+            # print("original:",np.array(self.data_PHEME[index]["edgeindex"]))
+            # print("BUEdgeIndex:",torch.LongTensor(new_edgeindex))
+            # print("TDEdgeIndex:",torch.LongTensor(bunew_edgeindex))
             return Data(x=data['x'].reshape(data["x"].shape[0],-1),
                     edge_index=torch.LongTensor(new_edgeindex),BU_edge_index=torch.LongTensor(bunew_edgeindex),
                     y=torch.LongTensor([int(data['y'])]), root=data['root'].reshape(data["root"].shape[0],-1),

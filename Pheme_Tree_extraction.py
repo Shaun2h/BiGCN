@@ -50,7 +50,7 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                             if not reactiondict["id_str"] in tree: # if self isn't in tree.
                                 tree[reactiondict["id_str"]] = [] # place self into treedict
                             
-                            if str(replytarget)+".json" in reactions:
+                            if str(replytarget)+".json" in reactions or str(replytarget) in tree:
                                 # print(replytarget)
                                 # print(reactions)
                                 if not str(replytarget) in tree:

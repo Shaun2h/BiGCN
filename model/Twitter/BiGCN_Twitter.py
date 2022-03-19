@@ -1,4 +1,5 @@
 import sys,os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 sys.path.append(os.getcwd())
 from Process.process import *
 import torch as th
@@ -79,11 +80,11 @@ class BUrumorGCN(th.nn.Module):
         return x
 
 class Net(th.nn.Module):
-    def __init__(self,in_feats,hid_feats,out_feats):
+    def __init__(self,in_feats,hid_feats,out_feats,secretfinalfc=4):
         super(Net, self).__init__()
         self.TDrumorGCN = TDrumorGCN(in_feats, hid_feats, out_feats)
         self.BUrumorGCN = BUrumorGCN(in_feats, hid_feats, out_feats)
-        self.fc=th.nn.Linear((out_feats+hid_feats)*2,4)
+        self.fc=th.nn.Linear((out_feats+hid_feats)*2,secretfinalfc)
 
     def forward(self, data):
         TD_x = self.TDrumorGCN(data)
@@ -99,8 +100,8 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
     is_PHEME= datasetname=="PHEME"
     if not is_PHEME:
         model = Net(5000,64,64).to(device)
-    else:
-        model = Net(256*768,64,64).to(device) # i'm assuming we're bert embedding this?? # yes shaun says lol.
+    else: # is pheme, i also change the class label possibility from 4 to 2.
+        model = Net(256*768,64,64,secretfinalfc=2).to(device) # i'm assuming we're bert embedding this?? # yes shaun says lol.
     BU_params=list(map(id,model.BUrumorGCN.conv1.parameters()))
     BU_params += list(map(id, model.BUrumorGCN.conv2.parameters()))
     base_params=filter(lambda p:id(p) not in BU_params,model.parameters())
@@ -124,12 +125,15 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         avg_loss = []
         avg_acc = []
         batch_idx = 0
-        tqdm_train_loader = tqdm(train_loader)
-        for Batch_data in tqdm_train_loader:
-            if len(Batch_data)<1:
-                continue
+        tqdm_train_loader = tqdm(enumerate(train_loader))
+        for _,Batch_data in tqdm_train_loader:
+            continue
             Batch_data.to(device)
+            # if Batch_data.rootindex.shape[0]!=3 and dataname=="PHEME":
+                # continue
             out_labels= model(Batch_data)
+            print("\nPERFORMANCE:\n",Batch_data,"\n",Batch_data.rootindex.shape[0],"\n")
+            print("Output shape:",out_labels.shape)
             finalloss=F.nll_loss(out_labels,Batch_data.y)
             loss=finalloss
             optimizer.zero_grad()
@@ -144,10 +148,9 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
                                                                                                  loss.item(),
                                                                                                  train_acc))
             batch_idx = batch_idx + 1
-
+        
         train_losses.append(np.mean(avg_loss))
         train_accs.append(np.mean(avg_acc))
-
         temp_val_losses = []
         temp_val_accs = []
         temp_val_Acc_all, temp_val_Acc1, temp_val_Prec1, temp_val_Recll1, temp_val_F1, \
@@ -155,12 +158,15 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         temp_val_Acc3, temp_val_Prec3, temp_val_Recll3, temp_val_F3, \
         temp_val_Acc4, temp_val_Prec4, temp_val_Recll4, temp_val_F4 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         model.eval()
-        tqdm_test_loader = tqdm(test_loader)
-        for Batch_data in tqdm_test_loader:
+        tqdm_test_loader = tqdm(enumerate(test_loader))
+        print("\n-------------------------------------------------------Initiating Test:--------------------------------------------------\n")
+        for _, Batch_data in tqdm_test_loader:
             Batch_data.to(device)
             val_out = model(Batch_data)
             val_loss  = F.nll_loss(val_out, Batch_data.y)
             temp_val_losses.append(val_loss.item())
+            print(val_out.shape)
+            print(Batch_data.y.shape)
             _, val_pred = val_out.max(dim=1)
             correct = val_pred.eq(Batch_data.y).sum().item()
             val_acc = correct / len(Batch_data.y)
@@ -216,7 +222,7 @@ TDdroprate=0.2
 BUdroprate=0.2
 datasetname=sys.argv[1] #"Twitter15"、"Twitter16"
 if datasetname=="PHEME":
-    batchsize=24 # If pheme, adjust to this.
+    batchsize=3 # If pheme, adjust to this.
 iterations=int(sys.argv[2])
 model="GCN"
 device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
