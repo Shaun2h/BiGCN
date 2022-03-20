@@ -23,6 +23,17 @@ class TDrumorGCN(th.nn.Module):
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
         x1=copy.copy(x.float())
+        # print("TD")
+        # print("x shape:",x.shape)
+        # print("Edge_index shape:",edge_index.shape)
+        # print("Edge_index:",edge_index)
+        # try:
+            # print("Maxes within edge:",th.max(edge_index,dim=1)[0])
+            # for item in th.max(edge_index,dim=1)[0]:
+                # if item>=x.shape[0]:
+                    # print("VIOLATION:",item, "    VS     ",x.shape)
+        # except IndexError:
+            # print("no links.")
         x = self.conv1(x, edge_index)
         x2=copy.copy(x)
         rootindex = data.rootindex
@@ -55,6 +66,18 @@ class BUrumorGCN(th.nn.Module):
     def forward(self, data):
         x, edge_index = data.x, data.BU_edge_index
         x1 = copy.copy(x.float())
+        # print("BU")
+        # print("x shape:",x.shape)
+        # print("Edge_index shape:",edge_index.shape)
+        # print("Edge_index:",edge_index)
+        # try:
+            # print("Maxes within edge:",th.max(edge_index,dim=1)[0])
+            # for item in th.max(edge_index,dim=1)[0]:
+                # if item>=x.shape[0]:
+                    # print("VIOLATION:",item, "    VS     ",x.shape)
+        # except IndexError:
+            # print("no links.")
+            
         x = self.conv1(x, edge_index)
         x2 = copy.copy(x)
 
@@ -95,7 +118,7 @@ class Net(th.nn.Module):
         return x
 
 
-def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,patience,n_epochs,batchsize,dataname,iter):
+def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,patience,n_epochs,batchsize,dataname,iter,picklefear=True):
     # Oh No! Naughty Injection via is_PHEME.
     is_PHEME= datasetname=="PHEME"
     if not is_PHEME:
@@ -116,7 +139,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
     train_accs = []
     val_accs = []
     early_stopping = EarlyStopping(patience=patience, verbose=True)
-    traindata_list, testdata_list = loadBiData(dataname, treeDic, x_train, x_test, TDdroprate,BUdroprate)
+    traindata_list, testdata_list = loadBiData(dataname, treeDic, x_train, x_test, TDdroprate,BUdroprate,picklefear=picklefear)
     train_loader = DataLoader(traindata_list, batch_size=batchsize, shuffle=True, num_workers=0)
     test_loader = DataLoader(testdata_list, batch_size=batchsize, shuffle=True, num_workers=0)
      # jesus christ i'm not reinitiating this EVERY epoch. i'm moving this out to initiate only once. it shouldn't have any effects.
@@ -125,30 +148,31 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         avg_loss = []
         avg_acc = []
         batch_idx = 0
-        tqdm_train_loader = tqdm(enumerate(train_loader))
-        for _,Batch_data in tqdm_train_loader:
-            continue
-            Batch_data.to(device)
+        for _,Batch_data in enumerate(train_loader):
+            
             # if Batch_data.rootindex.shape[0]!=3 and dataname=="PHEME":
                 # continue
-            out_labels= model(Batch_data)
-            print("\nPERFORMANCE:\n",Batch_data,"\n",Batch_data.rootindex.shape[0],"\n")
-            print("Output shape:",out_labels.shape)
-            finalloss=F.nll_loss(out_labels,Batch_data.y)
-            loss=finalloss
-            optimizer.zero_grad()
-            loss.backward()
-            avg_loss.append(loss.item())
-            optimizer.step()
-            _, pred = out_labels.max(dim=-1)
-            correct = pred.eq(Batch_data.y).sum().item()
-            train_acc = correct / len(Batch_data.y)
-            avg_acc.append(train_acc)
-            print("Iter {:03d} | Epoch {:05d} | Batch{:02d} | Train_Loss {:.4f}| Train_Accuracy {:.4f}".format(iter,epoch, batch_idx,
-                                                                                                 loss.item(),
-                                                                                                 train_acc))
-            batch_idx = batch_idx + 1
-        
+                Batch_data.to(device) # there appears to be some case where it's an empty... item? it's really confusing.
+                # like there is no reason for that to happen. 
+
+                out_labels= model(Batch_data)
+                finalloss=F.nll_loss(out_labels,Batch_data.y)
+                loss=finalloss
+                optimizer.zero_grad()
+                loss.backward()
+                avg_loss.append(loss.item())
+                optimizer.step()
+                _, pred = out_labels.max(dim=-1)
+                correct = pred.eq(Batch_data.y).sum().item()
+                train_acc = correct / len(Batch_data.y)
+                avg_acc.append(train_acc)
+                print("Iter {:03d} | Epoch {:05d} | Batch{:02d} | Train_Loss {:.4f}| Train_Accuracy {:.4f}".format(iter,epoch, batch_idx,
+                                                                                                     loss.item(),
+                                                                                                     train_acc))
+                batch_idx = batch_idx + 1
+            # print("\nPERFORMANCE:\n",Batch_data,"\n",Batch_data.rootindex.shape[0],"\n")
+            # print("Output shape:",out_labels.shape)
+            
         train_losses.append(np.mean(avg_loss))
         train_accs.append(np.mean(avg_acc))
         temp_val_losses = []
@@ -158,15 +182,14 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         temp_val_Acc3, temp_val_Prec3, temp_val_Recll3, temp_val_F3, \
         temp_val_Acc4, temp_val_Prec4, temp_val_Recll4, temp_val_F4 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         model.eval()
-        tqdm_test_loader = tqdm(enumerate(test_loader))
         print("\n-------------------------------------------------------Initiating Test:--------------------------------------------------\n")
-        for _, Batch_data in tqdm_test_loader:
+        for _, Batch_data in enumerate(test_loader):
             Batch_data.to(device)
             val_out = model(Batch_data)
             val_loss  = F.nll_loss(val_out, Batch_data.y)
             temp_val_losses.append(val_loss.item())
-            print(val_out.shape)
-            print(Batch_data.y.shape)
+            # print(val_out.shape)
+            # print(Batch_data.y.shape)
             _, val_pred = val_out.max(dim=1)
             correct = val_pred.eq(Batch_data.y).sum().item()
             val_acc = correct / len(Batch_data.y)
@@ -181,6 +204,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
             temp_val_Acc4.append(Acc4), temp_val_Prec4.append(Prec4), temp_val_Recll4.append(
                 Recll4), temp_val_F4.append(F4)
             temp_val_accs.append(val_acc)
+        
         val_losses.append(np.mean(temp_val_losses))
         val_accs.append(np.mean(temp_val_accs))
         print("Epoch {:05d} | Val_Loss {:.4f}| Val_Accuracy {:.4f}".format(epoch, np.mean(temp_val_losses),
@@ -222,7 +246,13 @@ TDdroprate=0.2
 BUdroprate=0.2
 datasetname=sys.argv[1] #"Twitter15"、"Twitter16"
 if datasetname=="PHEME":
-    batchsize=3 # If pheme, adjust to this.
+    batchsize=12 # If pheme, adjust to this.
+    
+##################
+picklefear = True # WARNING: WILL ATTEMPT TO PICKLE ALL POSSIBLE EMBEDS FOR PHEME (will crash lesser computers like mine...)
+##################
+
+
 iterations=int(sys.argv[2])
 model="GCN"
 device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')

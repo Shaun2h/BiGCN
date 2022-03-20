@@ -44,7 +44,11 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                             reactiondict = json.load(opened_reactiontweetfile)
                             reactiontweet = (reactiondict["text"], reactiondict["id_str"], reactiondict["id"]) 
                             # ["tweettext","tweetid","authid"]
-
+                            if reactiontweet[1]==sourcetweet[1]: # this is an actual pheme problem that NEEDS TO STOP
+                                print("There's a dupe for a reaction/root node. Pheme specific problem.")
+                                print(reactiondict["text"]) # WHY IS A SOURCE TWEET IN THE REACTIONS FOLDER???
+                                print(sourcedict["text"])
+                                continue 
                             threadtextlist.append(reactiontweet)
                             replytarget = reactiondict["in_reply_to_status_id"]
                             if not reactiondict["id_str"] in tree: # if self isn't in tree.
