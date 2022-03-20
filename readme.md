@@ -1,6 +1,14 @@
 # Paper of the source codes released:  
 Tian Bian, Xi Xiao, Tingyang Xu, Peilin Zhao, Wenbing Huang, Yu Rong, Junzhou Huang. Rumor Detectionon Social Media with Bi-Directional Graph Convolutional Networks. AAAI 2020.
 
+
+#READ: HOW TO ACTUALLY INSTALL
+It will fast track your process for reimplementing this/ running this.
+
+It acts to LOAD PHEME data in a (seemingly) correct (from what i can tell) way for you to get bigcn results.
+
+SHOULD NOT VARY TOO MUCH. (hopefully. I mean i wrote down the link for where to get torch scatter,sparse and cluster too...) 
+
 # Datasets:  
 The datasets used in the experiments were based on the three publicly available Weibo and Twitter datasets released by Ma et al. (2016) and Ma et al. (2017):
 

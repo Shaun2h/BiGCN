@@ -58,3 +58,20 @@ More customisation can be done to TRACE back the original words that were used..
 
 
 python .\model\Twitter\BiGCN_Twitter.py PHEME 100
+
+OR
+
+python .\model\Twitter\BiGCN_Twitter.py PHEME 100 1> output.txt 2>&1
+
+
+###################################################################################
+picklefear can be manually TOGGLED within BiGCN_Twitter.py, on line 252
+picklefear dictates whether you want to process ALL BERT embeds first and pickle it for future use.
+Due to pickle being insecure, this should be OFF by default
+(It will also consume a lot of space.)
+###################################################################################
+
+
+
+
+<end> 
