@@ -88,5 +88,17 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                     labelfile.write(str(source_id)+" 1\n")
                 else:
                     labelfile.write(str(source_id)+" 0\n") 
-                    
+    
+    if not os.path.exists("Eventsplit_details.txt"): # save all event ids separately for use as folds..
+        with open("phemethreaddump.json","r",encoding="utf-8") as dumpfile: # YES LEAVE IT IN ***** # edit this in later lol
+            allthreads = json.load(dumpfile)
+        with open("Eventsplit_details.txt","w") as eventsplitfile:
+            eventsplits = {}
+            for thread in allthreads:
+                threadtextlist,tree,rootlabel,source_id = thread
+                # rootlabel = (0,"non-rumours",eventname)
+                if not rootlabel[2] in eventsplits:
+                    eventsplits[rootlabel[2]] = []
+                eventsplits[rootlabel[2]].append(source_id)
+            json.dump(eventsplits,eventsplitfile,indent=4)
                     

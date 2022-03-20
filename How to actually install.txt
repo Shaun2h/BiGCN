@@ -70,8 +70,8 @@ picklefear dictates whether you want to process ALL BERT embeds first and pickle
 Due to pickle being insecure, this should be OFF by default
 (It will also consume a lot of space.)
 ###################################################################################
-
-
-
+# EVENT SPLITS:
+You can also TOGGLE EVENT SPLITS via a boolean in bigcn_twitter
+###################################################################################
 
 <end> 
