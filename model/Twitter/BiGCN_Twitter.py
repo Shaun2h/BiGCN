@@ -15,6 +15,10 @@ from tools.evaluate import *
 from torch_geometric.nn import GCNConv
 import copy
 
+
+# python model\Twitter\BiGCN_Twitter.py PHEME 100 1> output_BIGCN_events.txt 2>&1
+
+
 class TDrumorGCN(th.nn.Module):
     def __init__(self,in_feats,hid_feats,out_feats):
         super(TDrumorGCN, self).__init__()
@@ -119,7 +123,7 @@ class Net(th.nn.Module):
         return x
 
 
-def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,patience,n_epochs,batchsize,dataname,iter,picklefear=True):
+def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,patience,n_epochs,batchsize,dataname,iter,picklefear=True,commentary = ""):
     # Oh No! Naughty Injection via is_PHEME.
     is_PHEME= "PHEME" in dataname
     if not is_PHEME:
@@ -222,7 +226,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
                                                        np.mean(temp_val_Recll4), np.mean(temp_val_F4))]
         print('results:', res)
         early_stopping(np.mean(temp_val_losses), np.mean(temp_val_accs), np.mean(temp_val_F1), np.mean(temp_val_F2),
-                       np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN', dataname)
+                       np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN'+commentary, dataname)
         accs =np.mean(temp_val_accs)
         F1 = np.mean(temp_val_F1)
         F2 = np.mean(temp_val_F2)
@@ -251,7 +255,7 @@ if datasetname=="PHEME":
     
 ##################
 picklefear = True # WARNING: WILL ATTEMPT TO PICKLE ALL POSSIBLE EMBEDS FOR PHEME (will crash lesser computers like mine...)
-eventsplitter = False
+eventsplitter = True
 ##################
 
 
@@ -284,7 +288,8 @@ if not eventsplitter: # So just random folder:
                                                                                                    n_epochs,
                                                                                                    batchsize,
                                                                                                    datasetname,
-                                                                                                   iter)
+                                                                                                   iter,
+                                                                                                   "1")
         train_losses, val_losses, train_accs, val_accs1, accs1, F1_1, F2_1, F3_1, F4_1 = train_GCN(treeDic,
                                                                                                    fold1_x_test,
                                                                                                    fold1_x_train,
@@ -294,7 +299,8 @@ if not eventsplitter: # So just random folder:
                                                                                                    n_epochs,
                                                                                                    batchsize,
                                                                                                    datasetname,
-                                                                                                   iter)
+                                                                                                   iter,
+                                                                                                   "2")
         train_losses, val_losses, train_accs, val_accs2, accs2, F1_2, F2_2, F3_2, F4_2 = train_GCN(treeDic,
                                                                                                    fold2_x_test,
                                                                                                    fold2_x_train,
@@ -304,7 +310,8 @@ if not eventsplitter: # So just random folder:
                                                                                                    n_epochs,
                                                                                                    batchsize,
                                                                                                    datasetname,
-                                                                                                   iter)
+                                                                                                   iter,
+                                                                                                   "3")
         train_losses, val_losses, train_accs, val_accs3, accs3, F1_3, F2_3, F3_3, F4_3 = train_GCN(treeDic,
                                                                                                    fold3_x_test,
                                                                                                    fold3_x_train,
@@ -314,7 +321,8 @@ if not eventsplitter: # So just random folder:
                                                                                                    n_epochs,
                                                                                                    batchsize,
                                                                                                    datasetname,
-                                                                                                   iter)
+                                                                                                   iter,
+                                                                                                   "4")
         train_losses, val_losses, train_accs, val_accs4, accs4, F1_4, F2_4, F3_4, F4_4 = train_GCN(treeDic,
                                                                                                    fold4_x_test,
                                                                                                    fold4_x_train,
@@ -324,7 +332,8 @@ if not eventsplitter: # So just random folder:
                                                                                                    n_epochs,
                                                                                                    batchsize,
                                                                                                    datasetname,
-                                                                                                   iter)
+                                                                                                   iter,
+                                                                                                   "5")
         test_accs.append((accs0+accs1+accs2+accs3+accs4)/5)
         NR_F1.append((F1_0+F1_1+F1_2+F1_3+F1_4)/5)
         FR_F1.append((F2_0 + F2_1 + F2_2 + F2_3 + F2_4) / 5)
@@ -354,7 +363,8 @@ else:
                                                                                                     n_epochs,
                                                                                                     batchsize,
                                                                                                     datasetname+" "+event,
-                                                                                                    iter)
+                                                                                                    iter,
+                                                                                                    "event")
             test_accs.append(accs0)
             NR_F1.append(F1_0)
             FR_F1.append(F2_0)

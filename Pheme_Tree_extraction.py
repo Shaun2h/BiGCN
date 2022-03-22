@@ -5,7 +5,7 @@ import numpy as np
 
 # this serves to generate the REQUIRED file for pheme tree parsin..
 # please understand there are a lot of sparse trees so this is a highly DIFFICULT dataset if you're gcning it
-# python generation.py 1> generation_output.txt 2>&1
+# 
 
 
 
