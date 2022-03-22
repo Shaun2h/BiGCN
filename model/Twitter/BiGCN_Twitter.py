@@ -214,7 +214,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         val_accs.append(np.mean(temp_val_accs))
         print("Epoch {:05d} | Val_Loss {:.4f}| Val_Accuracy {:.4f}".format(epoch, np.mean(temp_val_losses),
                                                                            np.mean(temp_val_accs)))
-
+        
         res = ['acc:{:.4f}'.format(np.mean(temp_val_Acc_all)),
                'C1:{:.4f},{:.4f},{:.4f},{:.4f}'.format(np.mean(temp_val_Acc1), np.mean(temp_val_Prec1),
                                                        np.mean(temp_val_Recll1), np.mean(temp_val_F1)),
@@ -224,7 +224,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
                                                        np.mean(temp_val_Recll3), np.mean(temp_val_F3)),
                'C4:{:.4f},{:.4f},{:.4f},{:.4f}'.format(np.mean(temp_val_Acc4), np.mean(temp_val_Prec4),
                                                        np.mean(temp_val_Recll4), np.mean(temp_val_F4))]
-        print('results:', res)
+        print(commentary,'results:', res)
         early_stopping(np.mean(temp_val_losses), np.mean(temp_val_accs), np.mean(temp_val_F1), np.mean(temp_val_F2),
                        np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN'+commentary, dataname)
         accs =np.mean(temp_val_accs)
@@ -353,24 +353,24 @@ else:
             if notevent==event:
                 continue
             testfold.extend(eventsplits[notevent])
-        for iter in range(iterations):
-            train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
-                                                                                                    testfold,
-                                                                                                    trainfold,
-                                                                                                    TDdroprate,BUdroprate,
-                                                                                                    lr, weight_decay,
-                                                                                                    patience,
-                                                                                                    n_epochs,
-                                                                                                    batchsize,
-                                                                                                    datasetname+" "+event,
-                                                                                                    iter,
-                                                                                                    "event")
-            test_accs.append(accs0)
-            NR_F1.append(F1_0)
-            FR_F1.append(F2_0)
-            TR_F1.append(F3_0)
-            UR_F1.append(F4_0)
-            print("LOOP COMPLETED: EVENT- ",event)
-        print("OVERALL RESULTS FOR :",event)
-        print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
+        # for iter in range(iterations):
+        train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
+                                                                                                testfold,
+                                                                                                trainfold,
+                                                                                                TDdroprate,BUdroprate,
+                                                                                                lr, weight_decay,
+                                                                                                patience,
+                                                                                                n_epochs,
+                                                                                                batchsize,
+                                                                                                datasetname+" "+event,
+                                                                                                0,
+                                                                                                "event - "+event)
+        test_accs.append(accs0)
+        NR_F1.append(F1_0)
+        FR_F1.append(F2_0)
+        TR_F1.append(F3_0)
+        UR_F1.append(F4_0)
+        print("LOOP COMPLETED: EVENT- ",event)
+    print("OVERALL RESULTS FOR :",event)
+    print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
     sum(test_accs) / iterations, sum(NR_F1) /iterations, sum(FR_F1) /iterations, sum(TR_F1) / iterations, sum(UR_F1) / iterations))
