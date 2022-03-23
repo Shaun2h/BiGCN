@@ -6,8 +6,16 @@ import numpy as np
 # this serves to generate the REQUIRED file for pheme tree parsin..
 # please understand there are a lot of sparse trees so this is a highly DIFFICULT dataset if you're gcning it
 # 
+def traversal(ref_dict,currenttarget):
+    returnval = []
+    for i in ref_dict[currenttarget]:
+        returnval.extend(traversal(ref_dict,i))
+    for item in returnval:
+        item.insert(0,currenttarget)
+    returnval.append([currenttarget])
+    return returnval
 
-
+FORCE_ROOT_CONNECTION=True
 
 if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits.txt"):
     if not os.path.exists("phemethreaddump.json"):
@@ -27,7 +35,7 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                     if "." ==somethread[0]:
                         continue
                     sourcetweetfile = os.path.join(pheme_root,event,classification,somethread,"source-tweets",somethread+".json")
-                    
+                    approval_set = set()
                     with open(sourcetweetfile,"r",encoding="utf-8") as opened_sourcetweetfile:
                         sourcedict = json.load(opened_sourcetweetfile)
                     sourcetweet = (sourcedict["text"], sourcedict["id_str"], sourcedict["id"])
@@ -60,7 +68,23 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                                 if not str(replytarget) in tree:
                                     tree[str(replytarget)] = [] # if the response target hasn't been added but is a valid tweet in the dataset,
                                 tree[str(replytarget)].append(reactionfilename.replace(".json",""))
-                    
+                        if FORCE_ROOT_CONNECTION:
+                            variants = traversal(tree,sourcetweet[1]) # traverse for ALL POSSIBLE rootwalks
+                            for treewalk in variants:
+                                for nodename in treewalk:
+                                    approval_set.add(nodename)
+                            allowed_list = list(approval_set)
+                            for treetarget in list(tree.keys()):
+                                if not treetarget in allowed_list:
+                                    del tree[treetarget]
+                            finalthreadlist = []
+                            for i in threadtextlist:
+                                if i[1] in allowed_list:
+                                    finalthreadlist.append(i)
+                            threadtextlist = finalthreadlist
+                                
+                                
+                        variants = [x for x in variants if len(x)>1]
                     allthreads.append([threadtextlist,tree,rootlabel,sourcedict["id_str"]])
                     
         print("Parsed all files.")
