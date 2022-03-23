@@ -347,12 +347,12 @@ else:
     treeDic = {} # Won't be using this...
     for event in eventsplits:
         print("-"*25,event,"-"*25)
-        trainfold = eventsplits[event]
-        testfold = []
+        testfold = eventsplits[event]
+        trainfold = []
         for notevent in eventsplits:
             if notevent==event:
                 continue
-            testfold.extend(eventsplits[notevent])
+            trainfold.extend(eventsplits[notevent])
         # for iter in range(iterations):
         train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
                                                                                                 testfold,

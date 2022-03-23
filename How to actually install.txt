@@ -62,8 +62,10 @@ python .\model\Twitter\BiGCN_Twitter.py PHEME 100
 OR
 
 python .\model\Twitter\BiGCN_Twitter.py PHEME 100 1> output.txt 2>&1
-
-
+###################################################################################
+FORCE_ROOT_CONNETION in Pheme_Tree_extraction.py will dictate if you require the node to be connected
+by however many jumps to the root before you count it as part of the dataset.
+Manually toggleble. If you choose to change this, you must delete phemethreaddump.json and rerun.
 ###################################################################################
 picklefear can be manually TOGGLED within BiGCN_Twitter.py, on line 252
 picklefear dictates whether you want to process ALL BERT embeds first and pickle it for future use.
@@ -71,7 +73,7 @@ Due to pickle being insecure, this should be OFF by default
 (It will also consume a lot of space.)
 ###################################################################################
 # EVENT SPLITS:
-You can also TOGGLE EVENT SPLITS via a boolean in bigcn_twitter
+You can also TOGGLE EVENT SPLITS via a boolean in bigcn_twitter, which then splits events out into test, while leaving the rest as train.
 ###################################################################################
 
 <end> 

@@ -15,7 +15,7 @@ def traversal(ref_dict,currenttarget):
     returnval.append([currenttarget])
     return returnval
 
-FORCE_ROOT_CONNECTION=True
+FORCE_ROOT_CONNECTION=False
 
 if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits.txt"):
     if not os.path.exists("phemethreaddump.json"):
