@@ -24,6 +24,8 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
         allthreads = []
         print("beginning to load pheme dataset/setup files since they weren't done.")
         for event in eventlist:
+            if "." ==event[0]:
+                continue
             eventname = event.replace("-all-rnr-threads","")
             for classification in ["non-rumours","rumours"]:
                 if classification == "non-rumours":
