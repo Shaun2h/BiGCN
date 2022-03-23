@@ -14,7 +14,7 @@ from Process.rand5fold import *
 from tools.evaluate import *
 from torch_geometric.nn import GCNConv
 import copy
-
+import pprint
 
 # python model\Twitter\BiGCN_Twitter.py PHEME 100 1> output_BIGCN_events.txt 2>&1
 
@@ -188,6 +188,8 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         temp_val_Acc4, temp_val_Prec4, temp_val_Recll4, temp_val_F4 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         model.eval()
         print("\n-------------------------------------------------------Initiating Test:--------------------------------------------------\n")
+        rawcounts = {1:{"TP":0,"FP":0,"FN":0,"TN":0},2:{"TP":0,"FP":0,"FN":0,"TN":0},3:{"TP":0,"FP":0,"FN":0,"TN":0},4:{"TP":0,"FP":0,"FN":0,"TN":0}}
+
         for _, Batch_data in enumerate(test_loader):
             Batch_data.to(device)
             val_out = model(Batch_data)
@@ -198,7 +200,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
             _, val_pred = val_out.max(dim=1)
             correct = val_pred.eq(Batch_data.y).sum().item()
             val_acc = correct / len(Batch_data.y)
-            Acc_all, Acc1, Prec1, Recll1, F1, Acc2, Prec2, Recll2, F2, Acc3, Prec3, Recll3, F3, Acc4, Prec4, Recll4, F4 = evaluation4class(
+            Acc_all, Acc1, Prec1, Recll1, F1, Acc2, Prec2, Recll2, F2, Acc3, Prec3, Recll3, F3, Acc4, Prec4, Recll4, F4, rawdict= evaluation4class(
                 val_pred, Batch_data.y)
             temp_val_Acc_all.append(Acc_all), temp_val_Acc1.append(Acc1), temp_val_Prec1.append(
                 Prec1), temp_val_Recll1.append(Recll1), temp_val_F1.append(F1), \
@@ -209,7 +211,9 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
             temp_val_Acc4.append(Acc4), temp_val_Prec4.append(Prec4), temp_val_Recll4.append(
                 Recll4), temp_val_F4.append(F4)
             temp_val_accs.append(val_acc)
-        
+            for classy in rawdict:
+                for resultant_type in rawdict[classy]:
+                    rawcounts[classy][resultant_type] = rawdict[classy][resultant_type] + rawcounts[classy][resultant_type]
         val_losses.append(np.mean(temp_val_losses))
         val_accs.append(np.mean(temp_val_accs))
         print("Epoch {:05d} | Val_Loss {:.4f}| Val_Accuracy {:.4f}".format(epoch, np.mean(temp_val_losses),
@@ -225,6 +229,8 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
                'C4:{:.4f},{:.4f},{:.4f},{:.4f}'.format(np.mean(temp_val_Acc4), np.mean(temp_val_Prec4),
                                                        np.mean(temp_val_Recll4), np.mean(temp_val_F4))]
         print(commentary,'results:', res)
+        print(commentary,"rawcounts:")
+        pprint.pprint(rawcounts)
         early_stopping(np.mean(temp_val_losses), np.mean(temp_val_accs), np.mean(temp_val_F1), np.mean(temp_val_F2),
                        np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN'+commentary, dataname)
         accs =np.mean(temp_val_accs)

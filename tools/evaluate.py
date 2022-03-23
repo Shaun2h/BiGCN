@@ -88,7 +88,8 @@ def evaluation4class(prediction, y):  # 4 dim
     else:
         F4 = round(2 * Prec4 * Recll4 / (Prec4 + Recll4), 4)
 
-    return  Acc_all,Acc1, Prec1, Recll1, F1,Acc2, Prec2, Recll2, F2,Acc3, Prec3, Recll3, F3,Acc4, Prec4, Recll4, F4
+    rawdict = {1:{"TP":TP1,"FP":FP1,"FN":FN1,"TN":TN1},2:{"TP":TP2,"FP":FP2,"FN":FN2,"TN":TN2},3:{"TP":TP3,"FP":FP3,"FN":FN3,"TN":TN3},4:{"TP":TP4,"FP":FP4,"FN":FN4,"TN":TN4}}
+    return  Acc_all,Acc1, Prec1, Recll1, F1,Acc2, Prec2, Recll2, F2,Acc3, Prec3, Recll3, F3,Acc4, Prec4, Recll4, F4,rawdict
 
 def evaluationclass(prediction, y):  # 2 dim
     TP1, FP1, FN1, TN1 = 0, 0, 0, 0
