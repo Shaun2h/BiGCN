@@ -365,7 +365,6 @@ class bigraph_dataset_PHEME(Dataset):
         # print("original:",np.array(self.data_PHEME[index]["edgeindex"]))
         # print("BUEdgeIndex:",torch.LongTensor(new_edgeindex))
         # print("TDEdgeIndex:",torch.LongTensor(bunew_edgeindex))
-        print(data["x"].shape)
         output_data = Data(x=data['x'].reshape(data["x"].shape[0],-1),
                 edge_index=torch.LongTensor(new_edgeindex),BU_edge_index=torch.LongTensor(bunew_edgeindex),
                 y=torch.LongTensor([int(data['y'])]), root=data['root'].reshape(data["root"].shape[0],-1),

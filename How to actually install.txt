@@ -1,3 +1,10 @@
+Keep in mind the original code reports results via batch wise averaged results. 
+The results are hence inaccurate as compared to overall results.
+There is also the issue that their pheme dataset uses 3 class split when pheme is naturally only 4 or 2.
+So we don't know if "True rumours" = Rumour + True or Rumour+ False (using the veracity annotations.)
+No point investigating either because like Bigcn the original code is incorrect in how it reports results.
+
+
 You probably want to venv this because it toggles with versions of scikitlearn and other things.
 guys, cuda ISNT always back compatible. Stop fucking lying.
 
@@ -67,11 +74,9 @@ python .\model\Twitter\BiGCN_Twitter.py PHEME 100 True pickle
 python .\model\Twitter\BiGCN_Twitter.py PHEME 5 whatever whatever
 # Version for Folds, with pickle. 5 iterations of 5 fold splits. i.e model training process runs 5x5 = 25 times.
 python .\model\Twitter\BiGCN_Twitter.py PHEME 5 whatever pickle
+Handy Append to a file:
+ 1> output.txt 2>&1
 
-
-OR
-
-python .\model\Twitter\BiGCN_Twitter.py PHEME 100 1> output.txt 2>&1
 ###################################################################################
 FORCE_ROOT_CONNETION in Pheme_Tree_extraction.py will dictate if you require the node to be connected
 by however many jumps to the root before you count it as part of the dataset.
