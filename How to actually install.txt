@@ -32,9 +32,10 @@ run:
 
 unzip -d ./data/Weibo ./data/Weibo/weibotree.txt.zip
 
-mkdir .\data/Twitter15graph
-mkdir .\data/Twitter16graph
-mkdir .\data/weibograph
+# If required:
+mkdir .\data\Twitter15graph
+mkdir .\data\Twitter16graph
+mkdir .\data\weibograph
 
 
 In the home directory  (AND IT MUST BE THE HOME DIRECTORY)
@@ -56,8 +57,17 @@ More customisation can be done to TRACE back the original words that were used..
 
 
 
+# for pheme, the numbers don't even matter, but leave it as 100. It'll only ever run one iteration.
 
-python .\model\Twitter\BiGCN_Twitter.py PHEME 100
+# Version for event splits, NO PICKLE
+python .\model\Twitter\BiGCN_Twitter.py PHEME 100 True whatever
+# Version for event splits, with pickle.
+python .\model\Twitter\BiGCN_Twitter.py PHEME 100 True pickle
+# Version for Folds, NO PICKLE 5 iterations of 5 fold splits. i.e model training process runs 5x5 = 25 times.
+python .\model\Twitter\BiGCN_Twitter.py PHEME 5 whatever whatever
+# Version for Folds, with pickle. 5 iterations of 5 fold splits. i.e model training process runs 5x5 = 25 times.
+python .\model\Twitter\BiGCN_Twitter.py PHEME 5 whatever pickle
+
 
 OR
 

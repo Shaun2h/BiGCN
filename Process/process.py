@@ -1,5 +1,5 @@
 import os
-from Process.dataset import GraphDataset,BiGraphDataset,UdGraphDataset
+from Process.dataset import GraphDataset,BiGraphDataset,UdGraphDataset, bigraph_dataset_PHEME
 cwd=os.getcwd()
 
 
@@ -53,12 +53,19 @@ def loadUdData(dataname, treeDic,fold_x_train,fold_x_test,droprate):
     return traindata_list, testdata_list
 
 def loadBiData(dataname, treeDic, fold_x_train, fold_x_test, TDdroprate,BUdroprate,picklefear=True):
+    ispheme="PHEME" in dataname
     data_path = os.path.join(cwd,'data', dataname + 'graph')
     print("loading train set", )
-    traindata_list = BiGraphDataset(fold_x_train, treeDic, tddroprate=TDdroprate, budroprate=BUdroprate, data_path=data_path,ispheme="PHEME" in dataname,picklefear=picklefear)
+    if ispheme:
+        traindata_list = bigraph_dataset_PHEME(fold_x_train, treeDic, tddroprate=TDdroprate, budroprate=BUdroprate, picklefear=picklefear)
+    else:
+        traindata_list = BiGraphDataset(fold_x_train, treeDic, tddroprate=TDdroprate, budroprate=BUdroprate, data_path=data_path)
     print("train no:", len(traindata_list))
     print("loading test set", )
-    testdata_list = BiGraphDataset(fold_x_test, treeDic, data_path=data_path,ispheme="PHEME" in dataname,picklefear=picklefear)
+    if ispheme:
+        testdata_list = bigraph_dataset_PHEME(fold_x_test, treeDic, picklefear=picklefear)
+    else:
+        testdata_list = BiGraphDataset(fold_x_test, treeDic, data_path=data_path)
     print("test no:", len(testdata_list))
     return traindata_list, testdata_list
 
