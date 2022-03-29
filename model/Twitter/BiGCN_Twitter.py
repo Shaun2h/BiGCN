@@ -285,6 +285,7 @@ if not eventsplitter: # So just random folder:
         treeDic=loadTree(datasetname)
     else:
         treeDic = {} # Won't be using this...
+        iterations=1
     for iter in range(iterations):
         fold0_x_test, fold0_x_train, \
         fold1_x_test,  fold1_x_train,  \
@@ -366,11 +367,13 @@ else:
         print("-"*25,event,"-"*25)
         testfold = eventsplits[event]
         trainfold = []
+        if event=="ebola-essien" or event=="charliehebdo":
+            continue
         for notevent in eventsplits:
             if notevent==event:
                 continue
             trainfold.extend(eventsplits[notevent])
-        # for iter in range(iterations):
+
         train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
                                                                                                 testfold,
                                                                                                 trainfold,

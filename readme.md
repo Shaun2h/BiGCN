@@ -1,3 +1,7 @@
+# Important Note:
+Keep in mind the original code reports results via batch wise averaged results for F1. <br>
+The results are hence inaccurate as compared to overall results.<br>
+
 # Paper of the source codes released:  
 Tian Bian, Xi Xiao, Tingyang Xu, Peilin Zhao, Wenbing Huang, Yu Rong, Junzhou Huang. Rumor Detectionon Social Media with Bi-Directional Graph Convolutional Networks. AAAI 2020.
 
