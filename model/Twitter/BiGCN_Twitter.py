@@ -232,7 +232,7 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
         print(commentary,"rawcounts:")
         pprint.pprint(rawcounts)
         early_stopping(np.mean(temp_val_losses), np.mean(temp_val_accs), np.mean(temp_val_F1), np.mean(temp_val_F2),
-                       np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN'+commentary, dataname)
+                       np.mean(temp_val_F3), np.mean(temp_val_F4), model, 'BiGCN'+commentary, dataname,rawcounts,epoch)
         accs =np.mean(temp_val_accs)
         F1 = np.mean(temp_val_F1)
         F2 = np.mean(temp_val_F2)
