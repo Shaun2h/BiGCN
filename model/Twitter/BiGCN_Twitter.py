@@ -248,147 +248,148 @@ def train_GCN(treeDic, x_test, x_train,TDdroprate,BUdroprate,lr, weight_decay,pa
             break
     return train_losses , val_losses ,train_accs, val_accs,accs,F1,F2,F3,F4
 
-lr=0.0005
-weight_decay=1e-4
-patience=10
-n_epochs=200
-batchsize=128 #theirs is 128.. for pheme with a bert embedding though.. it's not really possible without a massive space.
-TDdroprate=0.2
-BUdroprate=0.2
-datasetname=sys.argv[1] #"Twitter15"、"Twitter16"
-if datasetname=="PHEME":
-    batchsize=12 # If pheme, adjust to this. explodes most lower end gpus otherwise. ( will already explode small ones)
+if __name__=="__main__":
+    lr=0.0005
+    weight_decay=1e-4
+    patience=10
+    n_epochs=200
+    batchsize=128 #theirs is 128.. for pheme with a bert embedding though.. it's not really possible without a massive space.
+    TDdroprate=0.2
+    BUdroprate=0.2
+    datasetname=sys.argv[1] #"Twitter15"、"Twitter16"
+    if datasetname=="PHEME":
+        batchsize=12 # If pheme, adjust to this. explodes most lower end gpus otherwise. ( will already explode small ones)
 
-iterations=int(sys.argv[2])
+    iterations=int(sys.argv[2])
 
-try:
-    eventsplitter = sys.argv[3]=="True" or sys.argv[3]=="true" or sys.argv[3]=="yes" or sys.argv[3]=="Yes"
-except IndexError: # index out of range. picklefear not specified.
-    print("3rd argument missing. If it was pheme, defaults to random folds of data. Else, nothing.")
-    eventsplitter = False
-try:
-    picklefear = sys.argv[3]!="pickle" # default to no pickle
-except IndexError:
-    print("4th argument missing. If it was pheme, defaults to NOT pickle. Else, nothing.")
-    picklefear = True
-    
-    
-model="GCN"
-device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
-test_accs = []
-NR_F1 = []
-FR_F1 = []
-TR_F1 = []
-UR_F1 = []
-if not eventsplitter: # So just random folder:
-    if datasetname!="PHEME":
-        treeDic=loadTree(datasetname)
+    try:
+        eventsplitter = sys.argv[3]=="True" or sys.argv[3]=="true" or sys.argv[3]=="yes" or sys.argv[3]=="Yes"
+    except IndexError: # index out of range. picklefear not specified.
+        print("3rd argument missing. If it was pheme, defaults to random folds of data. Else, nothing.")
+        eventsplitter = False
+    try:
+        picklefear = sys.argv[3]!="pickle" # default to no pickle
+    except IndexError:
+        print("4th argument missing. If it was pheme, defaults to NOT pickle. Else, nothing.")
+        picklefear = True
+        
+        
+    model="GCN"
+    device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
+    test_accs = []
+    NR_F1 = []
+    FR_F1 = []
+    TR_F1 = []
+    UR_F1 = []
+    if not eventsplitter: # So just random folder:
+        if datasetname!="PHEME":
+            treeDic=loadTree(datasetname)
+        else:
+            treeDic = {} # Won't be using this...
+        for iter in range(iterations):
+            fold0_x_test, fold0_x_train, \
+            fold1_x_test,  fold1_x_train,  \
+            fold2_x_test, fold2_x_train, \
+            fold3_x_test, fold3_x_train, \
+            fold4_x_test,fold4_x_train = load5foldData(datasetname)
+            train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
+                                                                                                       fold0_x_test,
+                                                                                                       fold0_x_train,
+                                                                                                       TDdroprate,BUdroprate,
+                                                                                                       lr, weight_decay,
+                                                                                                       patience,
+                                                                                                       n_epochs,
+                                                                                                       batchsize,
+                                                                                                       datasetname,
+                                                                                                       iter,
+                                                                                                       picklefear,
+                                                                                                       "1")
+            train_losses, val_losses, train_accs, val_accs1, accs1, F1_1, F2_1, F3_1, F4_1 = train_GCN(treeDic,
+                                                                                                       fold1_x_test,
+                                                                                                       fold1_x_train,
+                                                                                                       TDdroprate,BUdroprate, lr,
+                                                                                                       weight_decay,
+                                                                                                       patience,
+                                                                                                       n_epochs,
+                                                                                                       batchsize,
+                                                                                                       datasetname,
+                                                                                                       iter,
+                                                                                                       picklefear,
+                                                                                                       "2")
+            train_losses, val_losses, train_accs, val_accs2, accs2, F1_2, F2_2, F3_2, F4_2 = train_GCN(treeDic,
+                                                                                                       fold2_x_test,
+                                                                                                       fold2_x_train,
+                                                                                                       TDdroprate,BUdroprate, lr,
+                                                                                                       weight_decay,
+                                                                                                       patience,
+                                                                                                       n_epochs,
+                                                                                                       batchsize,
+                                                                                                       datasetname,
+                                                                                                       iter,
+                                                                                                       picklefear,
+                                                                                                       "3")
+            train_losses, val_losses, train_accs, val_accs3, accs3, F1_3, F2_3, F3_3, F4_3 = train_GCN(treeDic,
+                                                                                                       fold3_x_test,
+                                                                                                       fold3_x_train,
+                                                                                                       TDdroprate,BUdroprate, lr,
+                                                                                                       weight_decay,
+                                                                                                       patience,
+                                                                                                       n_epochs,
+                                                                                                       batchsize,
+                                                                                                       datasetname,
+                                                                                                       iter,
+                                                                                                       picklefear,
+                                                                                                       "4")
+            train_losses, val_losses, train_accs, val_accs4, accs4, F1_4, F2_4, F3_4, F4_4 = train_GCN(treeDic,
+                                                                                                       fold4_x_test,
+                                                                                                       fold4_x_train,
+                                                                                                       TDdroprate,BUdroprate, lr,
+                                                                                                       weight_decay,
+                                                                                                       patience,
+                                                                                                       n_epochs,
+                                                                                                       batchsize,
+                                                                                                       datasetname,
+                                                                                                       iter,
+                                                                                                       picklefear,
+                                                                                                       "5")
+            test_accs.append((accs0+accs1+accs2+accs3+accs4)/5)
+            NR_F1.append((F1_0+F1_1+F1_2+F1_3+F1_4)/5)
+            FR_F1.append((F2_0 + F2_1 + F2_2 + F2_3 + F2_4) / 5)
+            TR_F1.append((F3_0 + F3_1 + F3_2 + F3_3 + F3_4) / 5)
+            UR_F1.append((F4_0 + F4_1 + F4_2 + F4_3 + F4_4) / 5)
+        print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
+        sum(test_accs) / iterations, sum(NR_F1) /iterations, sum(FR_F1) /iterations, sum(TR_F1) / iterations, sum(UR_F1) / iterations))
     else:
+        with open("Eventsplit_details.txt","r") as eventsplitfile:
+            eventsplits = json.load(eventsplitfile)
         treeDic = {} # Won't be using this...
-    for iter in range(iterations):
-        fold0_x_test, fold0_x_train, \
-        fold1_x_test,  fold1_x_train,  \
-        fold2_x_test, fold2_x_train, \
-        fold3_x_test, fold3_x_train, \
-        fold4_x_test,fold4_x_train = load5foldData(datasetname)
-        train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
-                                                                                                   fold0_x_test,
-                                                                                                   fold0_x_train,
-                                                                                                   TDdroprate,BUdroprate,
-                                                                                                   lr, weight_decay,
-                                                                                                   patience,
-                                                                                                   n_epochs,
-                                                                                                   batchsize,
-                                                                                                   datasetname,
-                                                                                                   iter,
-                                                                                                   picklefear,
-                                                                                                   "1")
-        train_losses, val_losses, train_accs, val_accs1, accs1, F1_1, F2_1, F3_1, F4_1 = train_GCN(treeDic,
-                                                                                                   fold1_x_test,
-                                                                                                   fold1_x_train,
-                                                                                                   TDdroprate,BUdroprate, lr,
-                                                                                                   weight_decay,
-                                                                                                   patience,
-                                                                                                   n_epochs,
-                                                                                                   batchsize,
-                                                                                                   datasetname,
-                                                                                                   iter,
-                                                                                                   picklefear,
-                                                                                                   "2")
-        train_losses, val_losses, train_accs, val_accs2, accs2, F1_2, F2_2, F3_2, F4_2 = train_GCN(treeDic,
-                                                                                                   fold2_x_test,
-                                                                                                   fold2_x_train,
-                                                                                                   TDdroprate,BUdroprate, lr,
-                                                                                                   weight_decay,
-                                                                                                   patience,
-                                                                                                   n_epochs,
-                                                                                                   batchsize,
-                                                                                                   datasetname,
-                                                                                                   iter,
-                                                                                                   picklefear,
-                                                                                                   "3")
-        train_losses, val_losses, train_accs, val_accs3, accs3, F1_3, F2_3, F3_3, F4_3 = train_GCN(treeDic,
-                                                                                                   fold3_x_test,
-                                                                                                   fold3_x_train,
-                                                                                                   TDdroprate,BUdroprate, lr,
-                                                                                                   weight_decay,
-                                                                                                   patience,
-                                                                                                   n_epochs,
-                                                                                                   batchsize,
-                                                                                                   datasetname,
-                                                                                                   iter,
-                                                                                                   picklefear,
-                                                                                                   "4")
-        train_losses, val_losses, train_accs, val_accs4, accs4, F1_4, F2_4, F3_4, F4_4 = train_GCN(treeDic,
-                                                                                                   fold4_x_test,
-                                                                                                   fold4_x_train,
-                                                                                                   TDdroprate,BUdroprate, lr,
-                                                                                                   weight_decay,
-                                                                                                   patience,
-                                                                                                   n_epochs,
-                                                                                                   batchsize,
-                                                                                                   datasetname,
-                                                                                                   iter,
-                                                                                                   picklefear,
-                                                                                                   "5")
-        test_accs.append((accs0+accs1+accs2+accs3+accs4)/5)
-        NR_F1.append((F1_0+F1_1+F1_2+F1_3+F1_4)/5)
-        FR_F1.append((F2_0 + F2_1 + F2_2 + F2_3 + F2_4) / 5)
-        TR_F1.append((F3_0 + F3_1 + F3_2 + F3_3 + F3_4) / 5)
-        UR_F1.append((F4_0 + F4_1 + F4_2 + F4_3 + F4_4) / 5)
-    print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
-    sum(test_accs) / iterations, sum(NR_F1) /iterations, sum(FR_F1) /iterations, sum(TR_F1) / iterations, sum(UR_F1) / iterations))
-else:
-    with open("Eventsplit_details.txt","r") as eventsplitfile:
-        eventsplits = json.load(eventsplitfile)
-    treeDic = {} # Won't be using this...
-    for event in eventsplits:
-        print("-"*25,event,"-"*25)
-        testfold = eventsplits[event]
-        trainfold = []
-        for notevent in eventsplits:
-            if notevent==event:
-                continue
-            trainfold.extend(eventsplits[notevent])
+        for event in eventsplits:
+            print("-"*25,event,"-"*25)
+            testfold = eventsplits[event]
+            trainfold = []
+            for notevent in eventsplits:
+                if notevent==event:
+                    continue
+                trainfold.extend(eventsplits[notevent])
 
-        train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
-                                                                                                testfold,
-                                                                                                trainfold,
-                                                                                                TDdroprate,BUdroprate,
-                                                                                                lr, weight_decay,
-                                                                                                patience,
-                                                                                                n_epochs,
-                                                                                                batchsize,
-                                                                                                datasetname+" "+event,
-                                                                                                0,
-                                                                                                picklefear,
-                                                                                                "event - "+event)
-        test_accs.append(accs0)
-        NR_F1.append(F1_0)
-        FR_F1.append(F2_0)
-        TR_F1.append(F3_0)
-        UR_F1.append(F4_0)
-        print("LOOP COMPLETED: EVENT- ",event)
-    print("OVERALL RESULTS FOR :",event)
-    print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
-    sum(test_accs) / iterations, sum(NR_F1) /iterations, sum(FR_F1) /iterations, sum(TR_F1) / iterations, sum(UR_F1) / iterations))
+            train_losses, val_losses, train_accs, val_accs0, accs0, F1_0, F2_0, F3_0, F4_0 = train_GCN(treeDic,
+                                                                                                    testfold,
+                                                                                                    trainfold,
+                                                                                                    TDdroprate,BUdroprate,
+                                                                                                    lr, weight_decay,
+                                                                                                    patience,
+                                                                                                    n_epochs,
+                                                                                                    batchsize,
+                                                                                                    datasetname+" "+event,
+                                                                                                    0,
+                                                                                                    picklefear,
+                                                                                                    "event - "+event)
+            test_accs.append(accs0)
+            NR_F1.append(F1_0)
+            FR_F1.append(F2_0)
+            TR_F1.append(F3_0)
+            UR_F1.append(F4_0)
+            print("LOOP COMPLETED: EVENT- ",event)
+        print("OVERALL RESULTS FOR :",event)
+        print("Total_Test_Accuracy: {:.4f}|NR F1: {:.4f}|FR F1: {:.4f}|TR F1: {:.4f}|UR F1: {:.4f}".format(
+        sum(test_accs) / iterations, sum(NR_F1) /iterations, sum(FR_F1) /iterations, sum(TR_F1) / iterations, sum(UR_F1) / iterations))
