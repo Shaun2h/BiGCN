@@ -2,6 +2,9 @@
 Keep in mind the original code reports results via batch wise averaged results for F1. <br>
 The results are hence inaccurate as compared to overall results.<br>
 forced_parser.py can be run on an output file (see it's description string inside) and it will give you a quick comparison between actual and their reported version. The issue is minor but an issue nonetheless <br>
+
+Note that: ```bigcn_predict_all.py.py ``` has an example within for usage on single instances. (requires a tree) Otherwise it is PHEME only, and requires the actual files.bigcn_predict_all.py
+
 # Paper of the source codes released:  
 Tian Bian, Xi Xiao, Tingyang Xu, Peilin Zhao, Wenbing Huang, Yu Rong, Junzhou Huang. Rumor Detectionon Social Media with Bi-Directional Graph Convolutional Networks. AAAI 2020.
 
