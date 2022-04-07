@@ -276,8 +276,12 @@ if __name__ == '__main__':
     path_reference_dict = {}
     for eventwrap in os.listdir(mainpath):
         for item in os.listdir(os.path.join(mainpath,eventwrap,"rumours")):
+            if item[0]==".":
+                continue
             path_reference_dict[item] = os.path.join(mainpath,eventwrap,"rumours",item)
         for item in os.listdir(os.path.join(mainpath,eventwrap,"non-rumours")):
+            if item[0]==".":
+                continue
             path_reference_dict[item] = os.path.join(mainpath,eventwrap,"non-rumours",item)
 
     treelist = []
