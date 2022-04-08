@@ -3,6 +3,7 @@ import argparse
 import json
 import pprint
 import csv
+from datetime import datetime
 from time import time
 sys.path.append(os.getcwd())
 import torch as th
@@ -15,7 +16,7 @@ from torch_geometric.data import DataLoader
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
 from transformers import BertTokenizer, BertModel
-model_load_name = ""
+model_load_name = "BiGCN4PHEME.m"
 
 """
 This file is for creating an output csv file for a visualisation that is not available in this repository.
@@ -225,8 +226,8 @@ def run_model(tree, threadtextlist, source_id, rootlabel, model):
     output_data.num_nodes = output_data.x.size(0) # prevents a torch scatter error.
     output_data.batch = th.tensor([0]*output_data.x.shape[0]) # imitate torch geometric batch   
     output_data.to(device)
-
-    val_out = model(output_data)
+    with th.no_grad():
+        val_out = model(output_data)
 
     _, pred = val_out.max(dim=-1)
     # print("")
@@ -243,7 +244,7 @@ def run_model(tree, threadtextlist, source_id, rootlabel, model):
 if __name__ == '__main__':
     
     global device
-    device = "cuda:"+str(0) if th.cuda.is_available() else "cpu"
+    device = "cuda:"+str(1) if th.cuda.is_available() else "cpu"
     global Bert_Tokeniser 
     Bert_Tokeniser =  BertTokenizer.from_pretrained("bert-base-multilingual-uncased")
     global Bert_Embed 
@@ -275,6 +276,8 @@ if __name__ == '__main__':
     mainpath = os.path.join("all-rnr-annotated-threads")
     path_reference_dict = {}
     for eventwrap in os.listdir(mainpath):
+        if eventwrap[0] == ".":
+            continue
         for item in os.listdir(os.path.join(mainpath,eventwrap,"rumours")):
             if item[0]==".":
                 continue
@@ -299,7 +302,7 @@ if __name__ == '__main__':
             text = loaded_source["text"]
             source_id = loaded_source["id"]
             links = []
-            tree_dict[source_id] = [text,source_id,links]
+            tree_dict[source_id] = [text,source_id,links,predicted,actual,loaded_source["created_at"],loaded_source["user"]["screen_name"]]
             
         for item in list_of_reactions:
             if item[0] == ".":
@@ -314,36 +317,41 @@ if __name__ == '__main__':
                 retweetedornot = reaction_dict["retweeted"]
                 
                 if not reactionid in tree_dict:
-                    tree_dict[reactionid] = [reactiontext,reactionid,links]
+                    tree_dict[reactionid] = [reactiontext,reactionid,links,predicted,actual,reaction_dict["created_at"],reaction_dict["user"]["screen_name"]]
                 else:
-                    tree_dict[reactionid] = [reactiontext,reactionid,tree_dict[reactionid][2]]
+                    tree_dict[reactionid] = [reactiontext,reactionid,tree_dict[reactionid][2],predicted,actual,reaction_dict["created_at"],reaction_dict["user"]["screen_name"]]
                 
                 if reaction_target!="null":
                     if not reaction_target in tree_dict:
-                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Reply"]]]
-                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Reply"])
+                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Reply"]],None,None,None,None]
                     else:
                         tree_dict[reaction_target][2].append([reactionid,reaction_target,"Reply"])
-                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Reply"])
+                    tree_dict[reactionid][2].append([reactionid,reaction_target,"Reply"])
                         
                         
                 if retweetedornot:
                     if not reaction_target in tree_dict:
-                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Retweet"]]]
-                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Retweet"])
+                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Retweet"]],None,None,None,None]
                     else:
                         tree_dict[reaction_target][2].append([reactionid,reaction_target,"Retweet"])
-                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Retweet"])
+                    tree_dict[reactionid][2].append([reactionid,reaction_target,"Retweet"])
                     
-
+        print(tree_dict)
         treelist.append(tree_dict)
     
     with open(model_load_name+"_bigcn_all_predictions_dump.json","w",encoding="utf-8") as treedumpfile:
         # csvwriter = csv.writer(treedumpfile)
-        fieldnames = ["Text","ID","Links"]
+        fieldnames = ["Text","ID","Links","predicted","actual","timestamp","handle"]
         csvwriter = csv.DictWriter(treedumpfile, fieldnames=fieldnames)
         csvwriter.writeheader()
         for treeid in treelist:
             for node in treeid:
-                csvwriter.writerow({"Text":treeid[node][0], "ID":treeid[node][1], "Links":treeid[node][2]})
+                timestampval = str(treeid[node][5])
+                if timestampval!="None":
+                # "Wed Jan 07 11:11:33 +0000 2015" -> 2012-02-23 09:15:26 +00:00
+                    date = datetime.strptime(timestampval,"%a %b %d %H:%M:%S %z %Y").strftime("%Y-%m-%d %H:%M:%S %z")
+                else:
+                    date = "None"
+                
+                csvwriter.writerow({"Text":treeid[node][0], "ID":treeid[node][1], "Links":treeid[node][2],"predicted":treeid[node][3],"actual":treeid[node][4],"timestamp":date,"handle":treeid[node][6]})
     print("Dumped:",model_load_name+"_bigcn_all_predictions_dump.json")
