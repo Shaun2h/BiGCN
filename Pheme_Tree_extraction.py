@@ -15,9 +15,9 @@ def traversal(ref_dict,currenttarget):
     returnval.append([currenttarget])
     return returnval
 
-FORCE_ROOT_CONNECTION=True
+FORCE_ROOT_CONNECTION=False
 
-if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits.txt"):
+if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits.txt") or not os.path.exists("Eventsplit_details.txt"):
     if not os.path.exists("phemethreaddump.json"):
         pheme_root = "all-rnr-annotated-threads" # POINT ME
         eventlist = os.listdir(pheme_root)
