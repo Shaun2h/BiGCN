@@ -86,7 +86,7 @@ if not os.path.exists("phemethreaddump.json") or not os.path.exists("labelsplits
                             threadtextlist = finalthreadlist
                                 
                                 
-                        variants = [x for x in variants if len(x)>1]
+                        # variants = [x for x in variants if len(x)>1]
                     allthreads.append([threadtextlist,tree,rootlabel,sourcedict["id_str"]])
                     
         print("Parsed all files.")
