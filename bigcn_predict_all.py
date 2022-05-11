@@ -242,7 +242,8 @@ def run_model(tree, threadtextlist, source_id, rootlabel, model):
 
 
 if __name__ == '__main__':
-    
+    detailed_link_appending = False
+
     global device
     device = "cuda:"+str(0) if th.cuda.is_available() else "cpu"
     global Bert_Tokeniser 
@@ -317,26 +318,36 @@ if __name__ == '__main__':
                 reaction_target = reaction_dict["in_reply_to_status_id"]
                 retweetedornot = reaction_dict["retweeted"]
                 
+                
                 if not reactionid in tree_dict:
                     tree_dict[reactionid] = [reactiontext,reactionid,links,predicted,actual,reaction_dict["created_at"],reaction_dict["user"]["screen_name"],prediction_value]
                 else:
                     tree_dict[reactionid] = [reactiontext,reactionid,tree_dict[reactionid][2],predicted,actual,reaction_dict["created_at"],reaction_dict["user"]["screen_name"],prediction_value]
-                
-                if reaction_target!="null":
-                    if not reaction_target in tree_dict:
-                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Reply"]],None,None,None,None,None]
-                    else:
-                        tree_dict[reaction_target][2].append([reactionid,reaction_target,"Reply"])
-                    tree_dict[reactionid][2].append([reactionid,reaction_target,"Reply"])
-                        
-                        
-                if retweetedornot:
-                    if not reaction_target in tree_dict:
-                        tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Retweet"]],None,None,None,None,None]
-                    else:
-                        tree_dict[reaction_target][2].append([reactionid,reaction_target,"Retweet"])
-                    tree_dict[reactionid][2].append([reactionid,reaction_target,"Retweet"])
                     
+                    
+                if not detailed_link_appending:
+                    if not reaction_target in tree_dict:
+                        tree_dict[reaction_target] = [None,reaction_target,[reactionid],None,None,None,None,None]
+                    else:
+                        tree_dict[reaction_target][2].append(reactionid)
+                    tree_dict[reactionid][2].append(reaction_target)
+                
+                else:
+                    if reaction_target!="null":
+                        if not reaction_target in tree_dict:
+                            tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Reply"]],None,None,None,None,None]
+                        else:
+                            tree_dict[reaction_target][2].append([reactionid,reaction_target,"Reply"])
+                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Reply"])
+                            
+                            
+                    if retweetedornot:
+                        if not reaction_target in tree_dict:
+                            tree_dict[reaction_target] = [None,reaction_target,[[reactionid,reaction_target,"Retweet"]],None,None,None,None,None]
+                        else:
+                            tree_dict[reaction_target][2].append([reactionid,reaction_target,"Retweet"])
+                        tree_dict[reactionid][2].append([reactionid,reaction_target,"Retweet"])
+                        
         # print(tree_dict)
         treelist.append(tree_dict)
     
